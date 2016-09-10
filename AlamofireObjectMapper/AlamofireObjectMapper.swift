@@ -41,9 +41,36 @@ extension Request {
         return returnError
     }
     
+    internal static func createError(code: Int, failureReason: String) -> NSError {
+        let errorDomain = "com.alamofireobjectmapper.error"
+        
+        let userInfo = [NSLocalizedFailureReasonErrorKey: failureReason]
+        let returnError = NSError(domain: errorDomain, code: code, userInfo: userInfo)
+        
+        return returnError
+    }
+    
     public static func ObjectMapperSerializer<T: Mappable>(keyPath: String?, mapToObject object: T? = nil, context: MapContext? = nil) -> ResponseSerializer<T, NSError> {
         return ResponseSerializer { request, response, data, error in
             guard error == nil else {
+                if let data = data{
+                    do{
+                        let json = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableContainers) as! [String:AnyObject]
+                        let code = response!.statusCode
+                        let failureReason = json["errorDescription"] as! String
+                        let error1 = createError(code, failureReason: failureReason)
+                        return .Failure(error1)
+                    }
+                    catch {
+                        let code = response!.statusCode
+                        let stringRepresentation = String(data:data, encoding: NSUTF8StringEncoding)
+                        if let stringRepresentation = stringRepresentation{
+                            let error1 = createError(code, failureReason: stringRepresentation)
+                            return .Failure(error1)
+                        }
+                    }
+                }
+                
                 return .Failure(error!)
             }
             
@@ -55,7 +82,7 @@ extension Request {
             
             let JSONResponseSerializer = Request.JSONResponseSerializer(options: .AllowFragments)
             let result = JSONResponseSerializer.serializeResponse(request, response, data, error)
-        
+            
             let JSONToMap: AnyObject?
             if let keyPath = keyPath where keyPath.isEmpty == false {
                 JSONToMap = result.value?.valueForKeyPath(keyPath)
@@ -69,13 +96,13 @@ extension Request {
             } else if let parsedObject = Mapper<T>(context: context).map(JSONToMap){
                 return .Success(parsedObject)
             }
-
+            
             let failureReason = "ObjectMapper failed to serialize response."
             let error = newError(.DataSerializationFailed, failureReason: failureReason)
             return .Failure(error)
         }
     }
-
+    
     /**
      Adds a handler to be called once the request has finished.
      
@@ -94,6 +121,24 @@ extension Request {
     public static func ObjectMapperArraySerializer<T: Mappable>(keyPath: String?, context: MapContext? = nil) -> ResponseSerializer<[T], NSError> {
         return ResponseSerializer { request, response, data, error in
             guard error == nil else {
+                if let data = data{
+                    do{
+                        let json = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableContainers) as! [String:AnyObject]
+                        let code = response!.statusCode
+                        let failureReason = json["errorDescription"] as! String
+                        let error1 = createError(code, failureReason: failureReason)
+                        return .Failure(error1)
+                    }
+                    catch {
+                        let code = response!.statusCode
+                        let stringRepresentation = String(data:data, encoding: NSUTF8StringEncoding)
+                        if let stringRepresentation = stringRepresentation{
+                            let error1 = createError(code, failureReason: stringRepresentation)
+                            return .Failure(error1)
+                        }
+                    }
+                }
+                
                 return .Failure(error!)
             }
             
@@ -131,7 +176,7 @@ extension Request {
      - parameter completionHandler: A closure to be executed once the request has finished and the data has been mapped by ObjectMapper.
      
      - returns: The request.
-    */
+     */
     public func responseArray<T: Mappable>(queue queue: dispatch_queue_t? = nil, keyPath: String? = nil, context: MapContext? = nil, completionHandler: Response<[T], NSError> -> Void) -> Self {
         return response(queue: queue, responseSerializer: Request.ObjectMapperArraySerializer(keyPath, context: context), completionHandler: completionHandler)
     }
