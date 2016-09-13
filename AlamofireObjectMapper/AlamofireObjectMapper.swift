@@ -56,13 +56,13 @@ extension Request {
                 if let data = data{
                     do{
                         let json = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableContainers) as! [String:AnyObject]
-                        let code = response!.statusCode
+                        let code = response?.statusCode ?? 500
                         let failureReason = json["errorDescription"] as! String
                         let error1 = createError(code, failureReason: failureReason)
                         return .Failure(error1)
                     }
                     catch {
-                        let code = response!.statusCode
+                        let code = response?.statusCode ?? 500
                         let stringRepresentation = String(data:data, encoding: NSUTF8StringEncoding)
                         if let stringRepresentation = stringRepresentation{
                             let error1 = createError(code, failureReason: stringRepresentation)
@@ -124,13 +124,13 @@ extension Request {
                 if let data = data{
                     do{
                         let json = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableContainers) as! [String:AnyObject]
-                        let code = response!.statusCode
+                        let code = response?.statusCode ?? 500
                         let failureReason = json["errorDescription"] as! String
                         let error1 = createError(code, failureReason: failureReason)
                         return .Failure(error1)
                     }
                     catch {
-                        let code = response!.statusCode
+                        let code = response?.statusCode ?? 500
                         let stringRepresentation = String(data:data, encoding: NSUTF8StringEncoding)
                         if let stringRepresentation = stringRepresentation{
                             let error1 = createError(code, failureReason: stringRepresentation)
