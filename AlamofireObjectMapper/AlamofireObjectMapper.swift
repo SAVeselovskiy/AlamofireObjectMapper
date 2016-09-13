@@ -54,19 +54,21 @@ extension Request {
         return ResponseSerializer { request, response, data, error in
             guard error == nil else {
                 if let data = data{
-                    do{
-                        let json = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableContainers) as! [String:AnyObject]
-                        let code = response?.statusCode ?? 500
-                        let failureReason = json["errorDescription"] as! String
-                        let error1 = createError(code, failureReason: failureReason)
-                        return .Failure(error1)
-                    }
-                    catch {
-                        let code = response?.statusCode ?? 500
-                        let stringRepresentation = String(data:data, encoding: NSUTF8StringEncoding)
-                        if let stringRepresentation = stringRepresentation{
-                            let error1 = createError(code, failureReason: stringRepresentation)
+                    if data.length > 0{
+                        do{
+                            let json = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableContainers) as! [String:AnyObject]
+                            let code = response?.statusCode ?? 500
+                            let failureReason = json["errorDescription"] as! String
+                            let error1 = createError(code, failureReason: failureReason)
                             return .Failure(error1)
+                        }
+                        catch {
+                            let code = response?.statusCode ?? 500
+                            let stringRepresentation = String(data:data, encoding: NSUTF8StringEncoding)
+                            if let stringRepresentation = stringRepresentation{
+                                let error1 = createError(code, failureReason: stringRepresentation)
+                                return .Failure(error1)
+                            }
                         }
                     }
                 }
@@ -121,20 +123,22 @@ extension Request {
     public static func ObjectMapperArraySerializer<T: Mappable>(keyPath: String?, context: MapContext? = nil) -> ResponseSerializer<[T], NSError> {
         return ResponseSerializer { request, response, data, error in
             guard error == nil else {
-                if let data = data{
-                    do{
-                        let json = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableContainers) as! [String:AnyObject]
-                        let code = response?.statusCode ?? 500
-                        let failureReason = json["errorDescription"] as! String
-                        let error1 = createError(code, failureReason: failureReason)
-                        return .Failure(error1)
-                    }
-                    catch {
-                        let code = response?.statusCode ?? 500
-                        let stringRepresentation = String(data:data, encoding: NSUTF8StringEncoding)
-                        if let stringRepresentation = stringRepresentation{
-                            let error1 = createError(code, failureReason: stringRepresentation)
+                if let data = data {
+                    if data.length > 0{
+                        do{
+                            let json = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableContainers) as! [String:AnyObject]
+                            let code = response?.statusCode ?? 500
+                            let failureReason = json["errorDescription"] as! String
+                            let error1 = createError(code, failureReason: failureReason)
                             return .Failure(error1)
+                        }
+                        catch {
+                            let code = response?.statusCode ?? 500
+                            let stringRepresentation = String(data:data, encoding: NSUTF8StringEncoding)
+                            if let stringRepresentation = stringRepresentation{
+                                let error1 = createError(code, failureReason: stringRepresentation)
+                                return .Failure(error1)
+                            }
                         }
                     }
                 }
