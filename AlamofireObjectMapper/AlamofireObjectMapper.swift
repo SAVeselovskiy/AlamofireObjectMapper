@@ -63,7 +63,7 @@ extension DataRequest {
                         do{
                             let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as! [String:AnyObject]
                             let code = response?.statusCode ?? 500
-                            let failureReason = json["errorDescription"] as! String
+                            let failureReason = json["error_description"] as! String
                             let error1 = createError(code: code, failureReason: failureReason)
                             return .failure(error1)
                         }
@@ -132,7 +132,7 @@ extension DataRequest {
                         do{
                             let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as! [String:AnyObject]
                             let code = response?.statusCode ?? 500
-                            let failureReason = json["errorDescription"] as! String
+                            let failureReason = json["error_description"] as! String
                             let error1 = createError(code: code, failureReason: failureReason)
                             return .failure(error1)
                         }
