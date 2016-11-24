@@ -60,21 +60,24 @@ extension DataRequest {
             guard error == nil else {
                 if let data = data{
                     if data.count > 0{
+                        let code = response?.statusCode ?? 500
+                        var stringRepresentation = String(data:data, encoding: String.Encoding.utf8)
                         do{
-                            let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as! [String:AnyObject]
+                            let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
                             let code = response?.statusCode ?? 500
-                            let failureReason = json["error_description"] as! String
-                            let error1 = createError(code: code, failureReason: failureReason)
-                            return .failure(error1)
-                        }
-                        catch {
-                            let code = response?.statusCode ?? 500
-                            let stringRepresentation = String(data:data, encoding: String.Encoding.utf8)
-                            if let stringRepresentation = stringRepresentation{
-                                let error1 = createError(code: code, failureReason: stringRepresentation)
-                                return .failure(error1)
+                            let failureReason = json["error_description"] as? String
+                            if failureReason != nil{
+                                stringRepresentation = failureReason!
                             }
                         }
+                        catch {
+                            NSLog("AlamofireLogging: \(error)")
+                        }
+                        if let stringRepresentation = stringRepresentation{
+                                let error1 = createError(code: code, failureReason: stringRepresentation)
+                                return .failure(error1)
+                        }
+                        return .failure(createError(code: code, failureReason: "Unexpected server error"))
                     }
                 }
                 return .failure(error!)
@@ -129,21 +132,24 @@ extension DataRequest {
             guard error == nil else {
                 if let data = data{
                     if data.count > 0{
+                        let code = response?.statusCode ?? 500
+                        var stringRepresentation = String(data:data, encoding: String.Encoding.utf8)
                         do{
-                            let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as! [String:AnyObject]
+                            let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
                             let code = response?.statusCode ?? 500
-                            let failureReason = json["error_description"] as! String
-                            let error1 = createError(code: code, failureReason: failureReason)
-                            return .failure(error1)
-                        }
-                        catch {
-                            let code = response?.statusCode ?? 500
-                            let stringRepresentation = String(data:data, encoding: String.Encoding.utf8)
-                            if let stringRepresentation = stringRepresentation{
-                                let error1 = createError(code: code, failureReason: stringRepresentation)
-                                return .failure(error1)
+                            let failureReason = json["error_description"] as? String
+                            if failureReason != nil{
+                                stringRepresentation = failureReason!
                             }
                         }
+                        catch {
+                            NSLog("AlamofireLogging: \(error)")
+                        }
+                        if let stringRepresentation = stringRepresentation{
+                                let error1 = createError(code: code, failureReason: stringRepresentation)
+                                return .failure(error1)
+                        }
+                        return .failure(createError(code: code, failureReason: "Unexpected server error"))
                     }
                 }
                 return .failure(error!)
